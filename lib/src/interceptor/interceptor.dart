@@ -112,7 +112,6 @@ class QAInterceptor extends Interceptor {
         FormData formData = options.data;
         final boundary = formData.boundary;
         String result = '';
-        String curlString = '';
         for (var element in formData.fields) {
           result += "$boundary\n";
           result += "Content-Disposition: form-data; name=\"${element.key}\"\n";
