@@ -34,15 +34,18 @@ class WSServer {
         includeLoopback: false, type: InternetAddressType.IPv4);
     print('interfaces: $interfaces');
     for (NetworkInterface interface in interfaces) {
-      for (InternetAddress addr in interface.addresses) {
-        if (addr.type.name == 'IPv4') {
-          ipAddresses.add(addr.address);
-          print('ip has address ${addr.address}');
+      if (interface.name.contains('wlan') || interface.name.contains('en')) {
+        for (InternetAddress addr in interface.addresses) {
+          if (addr.type.name == 'IPv4') {
+            ipAddresses.add(addr.address);
+            print('ip has address ${addr.address}');
+            ipIpAddress = addr.address;
+          }
         }
       }
     }
-    NetworkInterface interface = interfaces.first;
-    ipIpAddress = interface.addresses.first.address;
+    // NetworkInterface interface = interfaces.first;
+    // ipIpAddress = interface.addresses.first.address;
   }
 
   void startWsServer() {
