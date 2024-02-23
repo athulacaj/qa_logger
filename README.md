@@ -1,39 +1,46 @@
-<!-- 
-This README describes the package. If you publish this package to pub.dev,
-this README's contents appear on the landing page for your package.
+# qa_logs
 
-For information about how to write a good package README, see the guide for
-[writing package pages](https://dart.dev/guides/libraries/writing-package-pages). 
-
-For general information about developing packages, see the Dart guide for
-[creating packages](https://dart.dev/guides/libraries/create-library-packages)
-and the Flutter guide for
-[developing packages and plugins](https://flutter.dev/developing-packages). 
--->
-
-TODO: Put a short description of the package here that helps potential users
-know whether this package might be useful for them.
+`qa_logs` is a Dart package that provides a simple and efficient way to monitor and log network calls in your application. It's an essential tool for debugging and quality assurance.
 
 ## Features
 
-TODO: List what your package can do. Maybe include images, gifs, or videos.
+- Easy integration with Dio
+- Detailed logging of network requests and responses
+- Helps in identifying network-related issues
 
-## Getting started
+## Installation
 
-TODO: List prerequisites and provide or point to information on how to
-start using the package.
+Add `qa_logs` to your `pubspec.yaml` file:
+
+```yaml
+dependencies:
+  qa_logs: ^1.0.0
+```
+
+Then run `flutter pub get`.
 
 ## Usage
 
-TODO: Include short and useful examples for package users. Add longer examples
-to `/example` folder. 
+Import `qa_logs` in your Dart file:
 
 ```dart
-const like = 'sample';
+import 'package:qa_logs/qa_logs.dart';
 ```
 
-## Additional information
+Add the `QAInterceptor` to your Dio instance:
 
-TODO: Tell users more about the package: where to find more information, how to 
-contribute to the package, how to file issues, what response they can expect 
-from the package authors, and more.
+```dart
+_dio.interceptors.add(QAInterceptor());
+```
+
+Now, all network requests and responses made by the Dio instance will be logged by the `QAInterceptor`.
+
+## Viewing Logs
+
+To view the logs, open `localhost:3000` on your device. 
+
+If you want to view the logs on your laptop, ensure that your device and laptop are connected to the same WiFi network. Then, open the browser on your laptop and enter the IP address of the application running device (you can get ip from localhost:3000 also) followed by port `3000`.
+
+For example, if the IP address of your device is `192.168.1.5`, you would enter `192.168.1.5:3000` in your browser.
+
+This will allow you to monitor the network calls of your application in real-time.

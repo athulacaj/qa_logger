@@ -54,8 +54,7 @@ class WSServer {
     });
 
     // get a random port from 8002 to 8200
-    final port =
-        shelf_io.serve(handler, InternetAddress.anyIPv4, wsPort).then((server) {
+    shelf_io.serve(handler, InternetAddress.anyIPv4, wsPort).then((server) {
       print('Serving at ws://${server.address.host}:${server.port}');
       getAddress();
       // get my ip address

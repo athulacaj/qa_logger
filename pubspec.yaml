@@ -1,6 +1,6 @@
 name: qa_logger
-description: A starting point for Dart libraries or applications.
-version: 1.0.0
+description: qa_logs is a Dart package designed to assist with monitoring and logging network calls within your application
+version: 0.1.0
 # repository: https://github.com/my_org/my_repo
 
 environment:
@@ -13,7 +13,6 @@ dependencies:
   shelf: ^1.4.1
   flutter_express: ^0.7.2
   dio: ^5.4.0
-  web_socket_channel: 2.4.0
 
 dev_dependencies:
   lints: ^2.0.0
