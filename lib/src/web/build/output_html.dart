@@ -26,29 +26,43 @@ final String htmlString = r'''<!DOCTYPE html>
   integrity="sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL" crossorigin="anonymous"></script>
 
 <!-- assets -->
+<!-- clear -->
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" />
-
+<!-- newtork_check -->
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" />
+<!-- terminal -->
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" />
 <body>
-  <div id="notification" style="display:none;position: absolute;z-index: 1000;width: 100%;" class="alert alert-info" role="alert" data-bs-theme="dark">
+  <div id="notification" style="display:none; position: absolute;z-index: 1000;width: 100%;" class="alert alert-info" role="alert" data-bs-theme="dark">
     <button type="button" style="margin-left:auto;padding:0px 10px 2px 10px;display: inline;" 
     onclick="closeNotification()" class="close" data-dismiss="modal" aria-label="Close">
       <span aria-hidden="true">&times;</span>
     </button>
     <span>Open this URL on devices connected to the same network:  </span>
-    <span id="ip_address" style="margin-left: 10px; color: #fff;"></span>
+    <span id="ip_address" style="margin-left: 6px; color: #fff;"></span>
+    <span>,&nbsp; Ws port: </span>
+    <span id="ws_port" style="margin-left: 6px; color: #fff;"></span>
   </div>
 
   <div class="container-fluid body-container">
 
     <!-- tool bar  -->
-    <div style="padding:12px 0 0px 4px;">
-      <button type="button" onclick="onClearButtonClick()" class="btn btn-outline-dark btn-sm my-btn-outline">
+    <div style="padding:12px 0 6px 4px;display: flex; gap: 8px;color:#252830;">
+      <button type="button" id="network_btn" onclick="appBarBtn(0)" class="btn btn-outline-dark btn-sm my-btn-outline my-btn-selected">
+        <span class="material-symbols-outlined">network_check</span>
+        <span style="margin-left: 6px;">Network </span>
+      </button>
+      <button type="button" id="log_btn" onclick="appBarBtn(1)" class="btn btn-outline-dark btn-sm my-btn-outline">
+        <span class="material-symbols-outlined">terminal</span>
+        <span style="margin-left: 6px;">Logs </span>
+      </button>
+      <button type="button" style="margin-left: auto;" onclick="onClearButtonClick()" class="btn btn-outline-dark btn-sm my-btn-outline">
         <span class="material-symbols-outlined">block</span>
         <span style="margin-left: 6px;">clear</span>
       </button>
     </div>
-    <div class="content">
-
+    <div class="logger_box" id="logger"></div>
+    <div class="content"  id="api_logger">
       <div class="content_left">
         <div class="content_left_main" id="api-list-box">
           <!-- content for this -->

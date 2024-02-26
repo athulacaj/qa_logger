@@ -48,19 +48,18 @@ class RequestNode {
   }
 }
 
-class QAInterceptor extends Interceptor {
-  static final instance = QAInterceptor._();
+class DioInterceptor extends Interceptor {
+  static final instance = DioInterceptor._();
   final WSServer _wsServer = WSServer();
 
-  QAInterceptor._() {
-    _wsServer.startWsServer();
+  DioInterceptor._() {
     requestStream.stream.listen((RequestNode request) {
       print("stream qa logs request : $request");
       _wsServer.sendWsMessage(request.toJson());
     });
   }
 
-  factory QAInterceptor() => instance;
+  factory DioInterceptor() => instance;
 
   final request = true;
   final requestHeader = true;
@@ -68,7 +67,6 @@ class QAInterceptor extends Interceptor {
   final responseHeader = true;
   final responseBody = true;
   final error = true;
-  final logPrint = _debugPrint;
 
   @override
   void onRequest(
@@ -98,16 +96,11 @@ class QAInterceptor extends Interceptor {
       requestNode.addRequest('extra', options.extra);
     }
     if (requestHeader) {
-      logPrint('headers:');
-      // requestNode.addRequest('headers', options.headers);
-      // options.headers.forEach((key, v) => _printKV(' $key', v));
       Map headers = {};
       options.headers.forEach((key, v) => headers[key] = v);
       requestNode.addRequest('headers', headers);
     }
     if (requestBody) {
-      // logPrint('data:');
-      // _printAll(options.data);
       if (options.data is FormData) {
         FormData formData = options.data;
         final boundary = formData.boundary;
@@ -132,10 +125,7 @@ class QAInterceptor extends Interceptor {
         requestNode.addRequest('data', options.data);
       }
     }
-    logPrint('');
 
-    // print("qa logs request: ${requestNode.toJson()}");
-    // print("qa logs request: $requesttList");
     requestStream.sink.add(requestNode);
     options.extra['qa_logs_id'] = requestNode.id;
 
@@ -144,7 +134,6 @@ class QAInterceptor extends Interceptor {
 
   @override
   void onResponse(Response response, ResponseInterceptorHandler handler) async {
-    logPrint('*** Response ***');
     _addResponse(response);
     handler.next(response);
   }
@@ -152,20 +141,18 @@ class QAInterceptor extends Interceptor {
   @override
   void onError(DioException err, ErrorInterceptorHandler handler) async {
     if (error) {
-      logPrint('*** DioException ***:');
-      logPrint('uri: ${err.requestOptions.uri}');
-      logPrint('$err');
+      // logPrint('*** DioException ***:');
+      // logPrint('uri: ${err.requestOptions.uri}');
+      // logPrint('$err');
       if (err.response != null) {
         _addResponse(err.response!);
       }
-      logPrint('');
     }
 
     handler.next(err);
   }
 
   void _addResponse(Response response) {
-    _printKV('uri', response.requestOptions.uri);
     RequestNode requestNode =
         requesttList[response.requestOptions.extra['qa_logs_id']];
 
@@ -192,24 +179,6 @@ class QAInterceptor extends Interceptor {
       } else {
         requestNode.addResponse('data', response.data);
       }
-      // logPrint('Response Text:');
-      // _printAll(response.toString());
     }
-    logPrint('');
   }
-
-  void _printKV(String key, Object? v) {
-    logPrint('$key: $v');
-  }
-
-  void _printAll(msg) {
-    msg.toString().split('\n').forEach(logPrint);
-  }
-}
-
-void _debugPrint(Object? object) {
-  assert(() {
-    print(object);
-    return true;
-  }());
 }

@@ -83,8 +83,8 @@ class WSServer {
     app.get('/ip', (req, res) async {
       res.json({
         'ip': ipIpAddress,
-        'port': wsPort,
         'ws': 'ws://$ipIpAddress:$wsPort',
+        'wsPort': wsPort,
       });
     });
 
@@ -101,3 +101,4 @@ class WSServer {
 
 // adb forward tcp:8081 tcp:8081
 // adb forward tcp:3000 tcp:3000
+// adb forward --remove tcp:300

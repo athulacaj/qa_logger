@@ -1,15 +1,29 @@
 part of qa_logger;
 
-class NetworkLogger {
-  static final NetworkLogger _instance = NetworkLogger._();
+class QaLogger {
+  static final QaLogger _instance = QaLogger._();
   final WSServer _wsServer = WSServer();
+  final LogHelper _logHelper = LogHelper();
 
-  NetworkLogger._() {
+  QaLogger._() {
     _wsServer.startWsServer();
-    // ping();
   }
-  factory NetworkLogger() {
+  factory QaLogger() {
     return _instance;
+  }
+
+  get dioInterceptor => DioInterceptor();
+
+  void log(String? message) {
+    if (message != null) {
+      _logHelper.log(message);
+    }
+  }
+
+  void logError(String? message) {
+    if (message != null) {
+      _logHelper.logError(message);
+    }
   }
 
   void ping() {
