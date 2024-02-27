@@ -3,8 +3,6 @@
 /// More dartdocs go here.
 library qa_logger;
 
-// TODO: Export any libraries intended for clients of this package.
-
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io';

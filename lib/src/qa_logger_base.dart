@@ -1,7 +1,7 @@
 part of qa_logger;
 
 class QaLogger {
-  static final QaLogger _instance = QaLogger._();
+  static QaLogger? _instance;
   final WSServer _wsServer = WSServer();
   final LogHelper _logHelper = LogHelper();
 
@@ -9,7 +9,8 @@ class QaLogger {
     _wsServer.startWsServer();
   }
   factory QaLogger() {
-    return _instance;
+    _instance ??= QaLogger._();
+    return _instance!;
   }
 
   get dioInterceptor => DioInterceptor();

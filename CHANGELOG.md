@@ -1,3 +1,6 @@
+## 0.2.1
+
+- Code cleanup.
 ## 0.2.0
 
 - Added Log and LogError methods to the QaLogger class.
