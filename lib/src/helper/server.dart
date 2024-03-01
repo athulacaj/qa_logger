@@ -1,20 +1,30 @@
-part of qa_logger;
+import 'dart:io';
+import 'dart:math';
+
+import 'package:flutter_express/flutter_express.dart';
+import 'package:flutter_express/middlewares.dart';
+import 'package:qa_logger/src/web/build/output_css.dart';
+import 'package:qa_logger/src/web/build/output_html.dart';
+import 'package:qa_logger/src/web/build/output_js.dart';
+import 'package:shelf/shelf_io.dart' as shelf_io;
+import 'package:shelf_web_socket/shelf_web_socket.dart';
 
 class WSServer {
-  static final WSServer _instance = WSServer._();
+  static WSServer? _instance;
   dynamic _webSocketChannel;
+  int tryCount = 0;
+  late int _wsPort;
 
   WSServer._() {
-    wsPort = getRandomPort();
     getAddress();
   }
 
   factory WSServer() {
-    return _instance;
+    _instance ??= WSServer._();
+    return _instance!;
   }
 
   List<String> ipAddresses = [];
-  late int wsPort;
 
   List<String> getIpAddress() {
     return ipAddresses;
@@ -22,7 +32,7 @@ class WSServer {
 
   int getRandomPort() {
     final Random random = Random();
-    return 8002 + random.nextInt(8201 - 8002);
+    return 8010 + random.nextInt(200);
   }
 
   String ipIpAddress = '';
@@ -48,7 +58,8 @@ class WSServer {
     // ipIpAddress = interface.addresses.first.address;
   }
 
-  void startWsServer() {
+  void startWsServer(int wsPort) {
+    _wsPort = wsPort;
     var handler = webSocketHandler((dynamic webSocket) {
       _webSocketChannel = webSocket;
       webSocket.stream.listen((message) {
@@ -61,9 +72,18 @@ class WSServer {
       print('Serving at ws://${server.address.host}:${server.port}');
       getAddress();
       // get my ip address
+    }).catchError((e) {
+      if (tryCount < 2) {
+        tryCount++;
+        getRandomPort();
+        startWsServer(getRandomPort());
+      }
+      print('qa_logger error: $e');
     });
+  }
+
+  void startExpressServer(int port) {
     final app = FlutterExpress();
-    const portNumber = 3000;
 
     app.use("*", [cors()]);
 
@@ -83,12 +103,12 @@ class WSServer {
     app.get('/ip', (req, res) async {
       res.json({
         'ip': ipIpAddress,
-        'ws': 'ws://$ipIpAddress:$wsPort',
-        'wsPort': wsPort,
+        'ws': 'ws://$ipIpAddress:$_wsPort',
+        'wsPort': _wsPort,
       });
     });
 
-    app.listen(portNumber, (server) {
+    app.listen(port, (server) {
       print('Server is running on port ${server.port}');
     });
   }

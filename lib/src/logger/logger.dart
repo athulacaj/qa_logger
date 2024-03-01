@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:qa_logger/qa_logger.dart';
+import 'package:qa_logger/src/helper/server.dart';
 
 class LogNode {
   final int _intId;

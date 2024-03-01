@@ -1,3 +1,7 @@
+## 0.3.0
+
+- can configure the port and wsPort in the QaLogger class.
+- web interface updated.
 ## 0.2.1
 
 - Code cleanup.

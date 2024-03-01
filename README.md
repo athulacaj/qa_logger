@@ -1,6 +1,6 @@
 # qa_logger
 
-`qa_logger` is a Dart package that provides a simple and efficient way to monitor and log network calls in your application. It's an essential tool for debugging and quality assurance.
+`qa_logger` is a Dart package that provides a simple and efficient way to monitor network calls and logs in your application. It's a good tool for QA and backend developers.
 
 ## Features
 
@@ -14,7 +14,7 @@ Add `qa_logger` to your `pubspec.yaml` file:
 
 ```yaml
 dependencies:
-  qa_logger: ^1.0.0
+  qa_logger: $currentVersion$
 ```
 
 Then run `flutter pub get`.
@@ -36,6 +36,10 @@ if (Kproduction == false) {
 ```
 
 Now, all network requests and responses made by the Dio instance will be logged by the `QAInterceptor`.
+By default, the server will run on port 3000. If you want to change the port, you can add the following configuration in main.dart:
+```dart
+QaLogger.configure(port: 3001, wsPort: 8001);
+```
 
 ## API for Getting Logs
 

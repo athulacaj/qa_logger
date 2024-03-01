@@ -37,7 +37,7 @@ body {
 .content {
     display: flex;
     width: 100%;
-    height: calc(100% - 50px);
+    height: calc(100% - 52px);
     padding: 10px 0;
 }
 
@@ -126,9 +126,6 @@ body {
     /* Vertical border */
 }
 
-.api_row:hover {
-    /* background-color: #333; */
-}
 
 th {
     position: sticky;
@@ -153,6 +150,13 @@ th {
     cursor: all-scroll;
     text-align: start;
 }
+
+@media screen and (max-width: 768px) {
+    .my_table>tbody>tr>td:nth-child(2) {
+        max-width: 180px;
+    }
+}
+
 
 .my_table>tbody>tr>td:nth-child(2)::-webkit-scrollbar {
     /* Hide the scrollbar for WebKit browsers */
@@ -204,7 +208,7 @@ th {
     border-top: 1px solid #333;
     padding: 14px;
     overflow: auto;
-    height: calc(100% - 50px);
+    height: calc(100% - 52px);
 }
 
 .tab-content {
@@ -302,10 +306,14 @@ th {
     word-break: break-all;
 }
 
+#myModal{
+    height:100%;
+    /* overflow: hidden; */
+}
 
 .modal-content {
     color: var(--text-color);
-    height: 100%;
+    min-height: 100%;
 }
 
 .modal-dialog {
@@ -363,9 +371,32 @@ th {
 }
 
 .logger_box {
-    height: calc(100% - 50px);
+    height: calc(100% - 52px);
     overflow-y: auto;
     display: none;
     border-top: 1px solid var(--text-color);
     margin-top: 16px;
+}
+
+
+.tool_bar {
+    padding: 12px 0 6px 4px;
+    display: flex;
+    gap: 8px;
+    color: #252830;
+    align-items: center;
+}
+
+/* ----- online ------ */
+.online_box {
+    margin-left: auto;
+}
+
+.online_box {
+    /*  red color initial */
+    background-color: #E06C75;
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    display: inline-block;
 }''';
