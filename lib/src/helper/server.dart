@@ -3,24 +3,28 @@ import 'dart:math';
 
 import 'package:flutter_express/flutter_express.dart';
 import 'package:flutter_express/middlewares.dart';
+import 'package:qa_logger/src/helper/fifo_que.dart';
+import 'package:qa_logger/src/helper/request_node.dart';
+
 import 'package:qa_logger/src/web/build/output_css.dart';
 import 'package:qa_logger/src/web/build/output_html.dart';
 import 'package:qa_logger/src/web/build/output_js.dart';
 import 'package:shelf/shelf_io.dart' as shelf_io;
 import 'package:shelf_web_socket/shelf_web_socket.dart';
 
-class WSServer {
-  static WSServer? _instance;
+class Server {
+  static Server? _instance;
   dynamic _webSocketChannel;
   int tryCount = 0;
   late int _wsPort;
+  late FiFoQueue<RequestNode> requestQueue;
 
-  WSServer._() {
+  Server._(this.requestQueue) {
     getAddress();
   }
 
-  factory WSServer() {
-    _instance ??= WSServer._();
+  factory Server({required FiFoQueue<RequestNode> requestQueue}) {
+    _instance ??= Server._(requestQueue);
     return _instance!;
   }
 
@@ -82,12 +86,14 @@ class WSServer {
     });
   }
 
-  void startExpressServer(int port) {
+  Future<void> startExpressServer(int port) async {
     final app = FlutterExpress();
 
     app.use("*", [cors()]);
 
     app.get('/', (req, res) async {
+      //  var mapUrl = '${p.toUri(p.relative(dartPath, from: _root)).path}'
+      //     '.browser_test.dart.js.map';
       String contents = htmlString;
       res.send(contents);
     });
@@ -107,18 +113,68 @@ class WSServer {
         'wsPort': _wsPort,
       });
     });
-
-    app.listen(port, (server) {
-      print('Server is running on port ${server.port}');
+    app.get("/history", (req, res) {
+      List<RequestNode> history = requestQueue.value;
+      List dataList = history.map((e) => e.toMap()).toList();
+      res.json(dataList);
     });
+
+    app.listen(port, () {
+      print('Server is running on port $port');
+    });
+
+    // var app = Router();
+
+    // app.get('/', (Request request) {
+    //   String contents = htmlString;
+    //   return Response.ok(contents, headers: {
+    //     'Content-Type': 'text/html',
+    //   });
+    // });
+
+    // app.get('/_support.css', (Request request, String user) {
+    //   String contents = cssString;
+    //   return Response.ok(contents, headers: {
+    //     'mime-type': 'text/css', // 'text/css
+    //     'Content-Type': 'text/css',
+    //   });
+    // });
+    // app.get('/_support.js', (Request request, String user) {
+    //   String contents = jsString;
+    //   return Response.ok(contents, headers: {
+    //     'Content-Type': 'text/javascript',
+    //   });
+    // });
+    // app.get('/user/<user>', (Request request, String user) {
+    //   return Response.ok('hello $user');
+    // });
+
+    // // var server = await io.serve(app, 'localhost', port);
+    // // print('Serving at http://${server.address.host}:${server.port}');
+
+    // var handler = const Pipeline()
+    //     .addMiddleware(logRequests())
+    //     .addHandler((Request request) {
+    //   List<RequestNode> history = requestQueue.value;
+    //   List dataList = [];
+    //   for (var i = 0; i < history.length; i++) {
+    //     final data = history[i].toMap();
+    //     dataList.add(data);
+    //   }
+    //   return Response.ok(jsonEncode(dataList), headers: {
+    //     'Content-Type': 'application/json',
+    //   });
+    // });
+
+    // var server = await shelf_io.serve(handler, 'localhost', port);
+
+    // // Enable content compression
+    // server.autoCompress = true;
+
+    // print('Serving at http://${server.address.host}:${server.port}');
   }
 
   void sendWsMessage(String message) {
     if (_webSocketChannel != null) _webSocketChannel!.sink.add(message);
   }
 }
-
-
-// adb forward tcp:8081 tcp:8081
-// adb forward tcp:3000 tcp:3000
-// adb forward --remove tcp:300

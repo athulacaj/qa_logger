@@ -79,7 +79,7 @@ For example, if the IP address of your device is `192.168.1.5`, you would enter 
 
 This will allow you to monitor the network calls of your application in real-time.
 
-### Viewing Logs from Android Emulator
+### Viewing logs from the Android Emulator on a PC browser
 
 To view the logs from an Android emulator, you need to forward the necessary ports using the Android Debug Bridge (adb) tool. 
 

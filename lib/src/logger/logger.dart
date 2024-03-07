@@ -1,6 +1,7 @@
 import 'dart:convert';
 
-import 'package:qa_logger/qa_logger.dart';
+import 'package:qa_logger/src/helper/fifo_que.dart';
+import 'package:qa_logger/src/helper/request_node.dart';
 import 'package:qa_logger/src/helper/server.dart';
 
 class LogNode {
@@ -35,7 +36,9 @@ class LogNode {
 }
 
 class LogHelper {
-  final WSServer _wsServer = WSServer();
+  LogHelper({required this.wsServer, required this.requestQueue});
+  late FiFoQueue<RequestNode> requestQueue;
+  final Server wsServer;
 
   makeLogPayload(String message, String type) {
     final request = RequestNode();
@@ -43,14 +46,15 @@ class LogHelper {
     request.addBase('message', message);
     request.addBase('logType', type);
     request.addBase('timestamp', DateTime.now().toIso8601String());
+    requestQueue.add(request);
     return request;
   }
 
   void log(String message) {
-    _wsServer.sendWsMessage(makeLogPayload(message, 'log').toJson());
+    wsServer.sendWsMessage(makeLogPayload(message, 'log').toJson());
   }
 
   void logError(String message) {
-    _wsServer.sendWsMessage(makeLogPayload(message, 'error').toJson());
+    wsServer.sendWsMessage(makeLogPayload(message, 'error').toJson());
   }
 }

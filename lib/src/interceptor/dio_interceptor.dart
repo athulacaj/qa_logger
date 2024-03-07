@@ -1,65 +1,22 @@
-part of qa_logger;
-
-List<RequestNode> requesttList = [];
-// create a stream for the request
-final requestStream = StreamController<RequestNode>.broadcast();
-// listen to the request stream for the changes
-
-class RequestNode {
-  final int _intId;
-  RequestNode() : _intId = requesttList.length {
-    requesttList.add(this);
-  }
-
-  Map base = {};
-  Map<String, dynamic> request = {};
-  Map<String, dynamic> response = {};
-
-  int get id => _intId;
-
-  addBase(String key, dynamic value) {
-    base[key] = value;
-  }
-
-  addRequest(String key, dynamic value) {
-    if (value is Duration) {
-      value = value.inSeconds;
-    }
-    request[key] = value;
-  }
-
-  addResponse(String key, dynamic value) {
-    response[key] = value;
-  }
-
-  String toJson() {
-    Map<String, dynamic> body = {
-      'id': _intId,
-      ...base,
-      'request': request,
-      'response': response,
-    };
-    return jsonEncode(body);
-  }
-
-  @override
-  String toString() {
-    return "${request['method']}: ${request['uri']}";
-  }
-}
+import 'package:dio/dio.dart';
+import 'package:qa_logger/src/helper/fifo_que.dart';
+import 'package:qa_logger/src/helper/request_node.dart';
+import 'package:qa_logger/src/helper/server.dart';
+import 'package:qa_logger/src/qa_logger_base.dart';
 
 class DioInterceptor extends Interceptor {
-  static final instance = DioInterceptor._();
-  final WSServer _wsServer = WSServer();
+  // static final instance = DioInterceptor._();
+  final Server wsServer;
+  late FiFoQueue<RequestNode> requestQueue;
 
-  DioInterceptor._() {
-    requestStream.stream.listen((RequestNode request) {
+  DioInterceptor({required this.requestQueue, required this.wsServer}) {
+    QaLogger.requestStream.stream.listen((RequestNode request) {
       print("stream qa logs request : $request");
-      _wsServer.sendWsMessage(request.toJson());
+      wsServer.sendWsMessage(request.toJson());
     });
   }
 
-  factory DioInterceptor() => instance;
+  // factory DioInterceptor() => instance;
 
   final request = true;
   final requestHeader = true;
@@ -126,9 +83,10 @@ class DioInterceptor extends Interceptor {
       }
     }
 
-    requestStream.sink.add(requestNode);
+    QaLogger.requestStream.sink.add(requestNode);
     options.extra['qa_logs_id'] = requestNode.id;
 
+    requestQueue.add(requestNode);
     handler.next(options);
   }
 
@@ -153,32 +111,40 @@ class DioInterceptor extends Interceptor {
   }
 
   void _addResponse(Response response) {
-    RequestNode requestNode =
-        requesttList[response.requestOptions.extra['qa_logs_id']];
+    try {
+      RequestNode? requestNode =
+          requestQueue.getItem(response.requestOptions.extra['qa_logs_id']);
 
-    Duration duration = DateTime.now()
-        .difference(DateTime.parse(requestNode.request['timestamp']));
-    requestNode.addBase('type', 'response');
-    requestNode.addResponse('statusCode', response.statusCode);
-    requestNode.addResponse('duration', duration.inMilliseconds);
-
-    requestStream.sink.add(requestNode);
-
-    if (responseHeader) {
-      if (response.isRedirect == true) {
-        requestNode.addResponse('redirect', response.realUri.toString());
+      if (requestNode == null) {
+        return;
       }
 
-      Map headers = {};
-      response.headers.forEach((key, v) => headers[key] = v);
-      requestNode.addResponse('headers', headers);
-    }
-    if (responseBody) {
-      if (response.data is String) {
-        requestNode.addResponse('data', response.data);
-      } else {
-        requestNode.addResponse('data', response.data);
+      Duration duration = DateTime.now()
+          .difference(DateTime.parse(requestNode.request['timestamp']));
+      requestNode.addBase('type', 'response');
+      requestNode.addResponse('statusCode', response.statusCode);
+      requestNode.addResponse('duration', duration.inMilliseconds);
+
+      QaLogger.requestStream.sink.add(requestNode);
+
+      if (responseHeader) {
+        if (response.isRedirect == true) {
+          requestNode.addResponse('redirect', response.realUri.toString());
+        }
+
+        Map headers = {};
+        response.headers.forEach((key, v) => headers[key] = v);
+        requestNode.addResponse('headers', headers);
       }
+      if (responseBody) {
+        if (response.data is String) {
+          requestNode.addResponse('data', response.data);
+        } else {
+          requestNode.addResponse('data', response.data);
+        }
+      }
+    } catch (e) {
+      print(e);
     }
   }
 }
