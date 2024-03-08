@@ -1,4 +1,3 @@
-/* color palette: https://colorhunt.co/palette/252b484450695b9a8bf7e987 */
 
 * {
     margin: 0;
@@ -385,6 +384,16 @@ th {
     gap: 8px;
     color: #252830;
     align-items: center;
+}
+.toolbar_icon_label {
+    margin-left: 6px;
+    display: inline-block;
+}
+@media screen and (max-width: 768px) {
+    .toolbar_icon_label {
+        display: none;
+    }
+
 }
 
 /* ----- online ------ */

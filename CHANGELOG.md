@@ -1,3 +1,6 @@
+## 0.4.0
+- Introduced the queue to handle the logs. 
+
 ## 0.3.0
 
 - can configure the port and wsPort in the QaLogger class.

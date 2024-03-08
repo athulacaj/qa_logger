@@ -1,7 +1,13 @@
-final String jsString = r'''window.onload = function () {
+final String jsString = r'''var injectedData;
+
+window.onload = function () {
   dragUi();
-  // getIpAddressAndConnectWs();
-  handleAutoReconnect();
+  // IF IT IS INJECTED THEN IT WILL BE DOWNLOADED
+  if(!injectedData){
+    handleAutoReconnect();
+  }else{
+    renderInjectedData();
+  }
   if (typeof (navigator.clipboard) == 'undefined') {
     document.getElementById('copy_btn').style.display = 'none';
   }
@@ -36,11 +42,13 @@ var selectedRowIntId = null;
 
 function addOrUpdateApiRow(data) {
   const { request, response, id, type } = data;
-  if(type !== 'response' && type !== 'request'){
+  if (type !== 'response' && type !== 'request') {
     return;
   }
 
   const { uri, method, timestamp } = request;
+
+
   const { statusCode = "_", duration = "Pending" } = response;
   let newNode = document.createElement('tr');
 
@@ -48,7 +56,7 @@ function addOrUpdateApiRow(data) {
   newNode.id = "api_row_" + id;
   // if type is request then add new row else update the row
   if (type === 'response') {
-    newNode = document.getElementById("api_row_" + id);
+    newNode = document.getElementById("api_row_" + id) ?? newNode;
   }
   // adding onclick event to the row
   newNode.onclick = function () {
@@ -87,12 +95,12 @@ var isConnected = false;
 var tryCount = 0;
 
 function handleAutoReconnect() {
-  if (!isConnected&&tryCount<20) {
+  if (!isConnected && tryCount < 20) {
     console.log('Reconnecting... ');
     getIpAddressAndConnectWs();
     setTimeout(() => {
       handleAutoReconnect();
-    }, 1000+(tryCount*1500));
+    }, 1000 + (tryCount * 1500));
     tryCount++;
   }
 }
@@ -106,7 +114,7 @@ function listenToWebsocket(uri) {
     isConnected = true;
     tryCount = 0;
     console.log('WebSocket connection opened:', event);
-    document.getElementById('online_status').style.backgroundColor="#28a745"
+    document.getElementById('online_status').style.backgroundColor = "#28a745"
   });
 
   // Listening to connection error event
@@ -118,7 +126,7 @@ function listenToWebsocket(uri) {
   socket.addEventListener('close', (event) => {
     isConnected = false;
     console.log('WebSocket connection closed:', event);
-    document.getElementById('online_status').style.backgroundColor="#E06C75";
+    document.getElementById('online_status').style.backgroundColor = "#E06C75";
     handleAutoReconnect();
   });
 
@@ -133,18 +141,18 @@ function listenToWebsocket(uri) {
   });
 
   function addLogger(data) {
-    const { message, logType, id, type ,timestamp} = data;
-    if(type =='log'){
+    const { message, logType, id, type, timestamp } = data;
+    if (type == 'log') {
       let newNode = document.createElement('div');
       let timeStampNode = document.createElement('div');
       timeStampNode.className = 'log-time';
-      newNode.id="log_"+id;
-      if(logType === 'error'){
+      newNode.id = "log_" + id;
+      if (logType === 'error') {
         newNode.className = 'log-error';
-      }else{
+      } else {
         newNode.className = 'log';
       }
-      newNode.innerHTML =message;
+      newNode.innerHTML = message;
       timeStampNode.innerHTML = getTimeFromTimestamp(timestamp);
       newNode.appendChild(timeStampNode);
       const logBox = document.getElementById('logger');
@@ -262,6 +270,7 @@ function clearRightSideContent() {
 function renderOverviewTable(data) {
   const { request, response, id, type } = data;
   const { uri, method, timestamp } = request;
+
   const { statusCode = "_", duration = "Pending" } = response;
   const htmlString = `
       <tbody style="border: none;" >
@@ -326,7 +335,7 @@ function renderRequest(data) {
   // hide the tab if request is get
   if (request.method === 'GET') {
     document.getElementById('request_tab').style.display = 'none';
-  }else{
+  } else {
     document.getElementById('request_tab').style.display = 'block';
   }
 
@@ -351,15 +360,19 @@ function renderResponseBody(dataObj) {
   if (data) {
     document.getElementById('response_tab').style.display = 'block';
 
-    if (typeof data === 'object') {
-      var formatter = new JSONFormatter(data, 1, { theme: 'dark' });
-      let newNode = document.createElement('div');
-      newNode.innerHTML = `hello athul`;
-      tab4.appendChild(formatter.render());
-    } else {
-      tab4.innerHTML = data;
-    }
-  }else {
+    // if (typeof data !== 'object') {
+    //   try{
+    //     data = JSON.parse(data);
+    //   }catch(e){}
+    // }
+    var formatter = new JSONFormatter(data, 1, { theme: 'dark' });
+    let newNode = document.createElement('div');
+    newNode.innerHTML = `hello athul`;
+    tab4.appendChild(formatter.render());
+    // } else {
+    //   tab4.innerHTML = data;
+    // }
+  } else {
     document.getElementById('response_tab').style.display = 'none';
   }
 }
@@ -427,38 +440,84 @@ function onClearButtonClick() {
   clearRightSideContent();
 }
 
-function appBarBtn(index){
-  const btnIds= ["network_btn","log_btn"];
-  const contentIds = ["api_logger","logger",];
-  for(let i=0;i<btnIds.length;i++){
+function appBarBtn(index) {
+  const btnIds = ["network_btn", "log_btn"];
+  const contentIds = ["api_logger", "logger",];
+  for (let i = 0; i < btnIds.length; i++) {
     document.getElementById(btnIds[i]).classList.remove('my-btn-selected');
     document.getElementById(contentIds[i]).style.display = 'none';
   }
   document.getElementById(btnIds[index]).classList.add('my-btn-selected');
 
-  if(index==0){
+  if (index == 0) {
     document.getElementById(contentIds[index]).style.display = 'flex';
-  }else {
+  } else {
     document.getElementById(contentIds[index]).style.display = 'block';
   }
 
 
 }
 
-function getIpAddressAndConnectWs() {
-  const hostname = window.location.hostname;
-  // const hostname = "localhost"; // need for local testing
-  const path="/ip";
-  // const path="http://"+hostname+":3001"+"/ip"; // need for local testing
 
-  fetch(path,{
+
+function downloadHtml() {
+  fetch(basePath+"/download", {
+  }).then((res) => res.json()).
+    then((data) => {
+      console.log("download", data);
+      const blob = new Blob([data.data], { type: 'text/html' });
+      // const blob = new Blob([data], { type: 'application/octet-stream' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'index.html';
+      a.click();
+    }).catch((err) => { });
+}
+
+function renderInjectedData() {
+  console.log('injectedData', injectedData);
+  if (injectedData) {
+    injectedData.forEach((item) => {
+      addOrUpdateApiRow(item);
+    });
+  }
+}
+
+var isTesting = false;
+
+var hostname = window.location.hostname;
+var basePath = "";  
+
+if(isTesting){
+  // need for local testing
+   hostname = "localhost"; 
+   basePath = "http://" + hostname + ":3001"; 
+}
+
+
+
+function getIpAddressAndConnectWs() {
+
+  fetch(basePath+"/ip", {
   }).then((res) => res.json()).then((data) => {
-    document.getElementById('ip_address').innerHTML = "http://"+data.ip+":"+3000;
+    document.getElementById('ip_address').innerHTML =data.shareUrl;
     document.getElementById('ws_port').innerHTML = data.wsPort;
-    if (hostname === 'localhost'&& tryCount<2) {
+    if (hostname === 'localhost' && tryCount < 2) {
       document.getElementById('notification').style.display = 'block';
     }
     const ws = `ws://${hostname}:${data.wsPort}`;
-    listenToWebsocket(ws);
+
+    fetch(basePath+"/history", {
+    }).then((res) => res.json()).
+      then((data) => {
+        data.forEach((item) => {
+          addOrUpdateApiRow(item);
+        });
+        listenToWebsocket(ws);
+
+      }).
+      catch((err) => { });
+
   });
 }''';

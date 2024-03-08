@@ -2,11 +2,19 @@
 
 `qa_logger` is a Dart package that provides a simple and efficient way to monitor network calls and logs in your application. It's a good tool for QA and backend developers.
 
+![qa_logger cover](https://raw.githubusercontent.com/athulacaj/publicFiles/main/qalogger/desktop.png)
+
+<div style="display:flex;gap:14px">
+<img src="https://raw.githubusercontent.com/athulacaj/publicFiles/main/qalogger/mob1.png" height="300px">
+<img src="https://raw.githubusercontent.com/athulacaj/publicFiles/main/qalogger/mob2.png" height="300px">
+</div>
+
 ## Features
 
 - Easy integration with Dio
 - Detailed logging of network requests and responses
 - Helps in identifying network-related issues
+
 
 ## Installation
 

@@ -5,6 +5,7 @@ import 'package:flutter_express/flutter_express.dart';
 import 'package:flutter_express/middlewares.dart';
 import 'package:qa_logger/src/helper/fifo_que.dart';
 import 'package:qa_logger/src/helper/request_node.dart';
+import 'package:qa_logger/src/helper/util_functions.dart';
 
 import 'package:qa_logger/src/web/build/output_css.dart';
 import 'package:qa_logger/src/web/build/output_html.dart';
@@ -12,6 +13,7 @@ import 'package:qa_logger/src/web/build/output_js.dart';
 import 'package:shelf/shelf_io.dart' as shelf_io;
 import 'package:shelf_web_socket/shelf_web_socket.dart';
 
+/// Represents a server that handles WebSocket and Express server functionality.
 class Server {
   static Server? _instance;
   dynamic _webSocketChannel;
@@ -19,10 +21,12 @@ class Server {
   late int _wsPort;
   late FiFoQueue<RequestNode> requestQueue;
 
+  /// Private constructor for the Server class.
   Server._(this.requestQueue) {
     getAddress();
   }
 
+  /// Factory constructor for the Server class.
   factory Server({required FiFoQueue<RequestNode> requestQueue}) {
     _instance ??= Server._(requestQueue);
     return _instance!;
@@ -30,10 +34,12 @@ class Server {
 
   List<String> ipAddresses = [];
 
+  /// Returns a list of IP addresses.
   List<String> getIpAddress() {
     return ipAddresses;
   }
 
+  /// Generates a random port number.
   int getRandomPort() {
     final Random random = Random();
     return 8010 + random.nextInt(200);
@@ -42,6 +48,7 @@ class Server {
   String ipIpAddress = '';
   List<String> ipAddressList = [];
 
+  /// Retrieves the IP address of the server.
   Future<void> getAddress() async {
     print('printAddress');
     final interfaces = await NetworkInterface.list(
@@ -58,10 +65,9 @@ class Server {
         }
       }
     }
-    // NetworkInterface interface = interfaces.first;
-    // ipIpAddress = interface.addresses.first.address;
   }
 
+  /// Starts the WebSocket server.
   void startWsServer(int wsPort) {
     _wsPort = wsPort;
     var handler = webSocketHandler((dynamic webSocket) {
@@ -75,7 +81,6 @@ class Server {
     shelf_io.serve(handler, InternetAddress.anyIPv4, wsPort).then((server) {
       print('Serving at ws://${server.address.host}:${server.port}');
       getAddress();
-      // get my ip address
     }).catchError((e) {
       if (tryCount < 2) {
         tryCount++;
@@ -86,14 +91,13 @@ class Server {
     });
   }
 
+  /// Starts the Express server.
   Future<void> startExpressServer(int port) async {
     final app = FlutterExpress();
 
     app.use("*", [cors()]);
 
     app.get('/', (req, res) async {
-      //  var mapUrl = '${p.toUri(p.relative(dartPath, from: _root)).path}'
-      //     '.browser_test.dart.js.map';
       String contents = htmlString;
       res.send(contents);
     });
@@ -109,6 +113,7 @@ class Server {
     app.get('/ip', (req, res) async {
       res.json({
         'ip': ipIpAddress,
+        'shareUrl': 'http://$ipIpAddress:$port/',
         'ws': 'ws://$ipIpAddress:$_wsPort',
         'wsPort': _wsPort,
       });
@@ -119,61 +124,18 @@ class Server {
       res.json(dataList);
     });
 
+    app.get("/download", (req, res) {
+      String result =
+          UtilFunctions().getHtmlWithInjectedData(requestQueue.value);
+      res.json({"data": result});
+    });
+
     app.listen(port, () {
       print('Server is running on port $port');
     });
-
-    // var app = Router();
-
-    // app.get('/', (Request request) {
-    //   String contents = htmlString;
-    //   return Response.ok(contents, headers: {
-    //     'Content-Type': 'text/html',
-    //   });
-    // });
-
-    // app.get('/_support.css', (Request request, String user) {
-    //   String contents = cssString;
-    //   return Response.ok(contents, headers: {
-    //     'mime-type': 'text/css', // 'text/css
-    //     'Content-Type': 'text/css',
-    //   });
-    // });
-    // app.get('/_support.js', (Request request, String user) {
-    //   String contents = jsString;
-    //   return Response.ok(contents, headers: {
-    //     'Content-Type': 'text/javascript',
-    //   });
-    // });
-    // app.get('/user/<user>', (Request request, String user) {
-    //   return Response.ok('hello $user');
-    // });
-
-    // // var server = await io.serve(app, 'localhost', port);
-    // // print('Serving at http://${server.address.host}:${server.port}');
-
-    // var handler = const Pipeline()
-    //     .addMiddleware(logRequests())
-    //     .addHandler((Request request) {
-    //   List<RequestNode> history = requestQueue.value;
-    //   List dataList = [];
-    //   for (var i = 0; i < history.length; i++) {
-    //     final data = history[i].toMap();
-    //     dataList.add(data);
-    //   }
-    //   return Response.ok(jsonEncode(dataList), headers: {
-    //     'Content-Type': 'application/json',
-    //   });
-    // });
-
-    // var server = await shelf_io.serve(handler, 'localhost', port);
-
-    // // Enable content compression
-    // server.autoCompress = true;
-
-    // print('Serving at http://${server.address.host}:${server.port}');
   }
 
+  /// Sends a message through the WebSocket channel.
   void sendWsMessage(String message) {
     if (_webSocketChannel != null) _webSocketChannel!.sink.add(message);
   }

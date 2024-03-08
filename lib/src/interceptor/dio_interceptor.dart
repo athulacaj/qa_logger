@@ -127,18 +127,25 @@ class DioInterceptor extends Interceptor {
 
       QaLogger.requestStream.sink.add(requestNode);
 
+      Map headers = {};
       if (responseHeader) {
         if (response.isRedirect == true) {
           requestNode.addResponse('redirect', response.realUri.toString());
         }
-
-        Map headers = {};
         response.headers.forEach((key, v) => headers[key] = v);
         requestNode.addResponse('headers', headers);
       }
       if (responseBody) {
         if (response.data is String) {
-          requestNode.addResponse('data', response.data);
+          // escape ` character
+          String escapedData = response.data;
+          // if content-type:text/html;
+          if (headers['content-type'].first.contains('text/html')) {
+            escapedData =
+                "<pre>${escapedData.replaceAll('<', '&lt;').replaceAll('>', '&gt;')}</pre>";
+          }
+
+          requestNode.addResponse('data', escapedData);
         } else {
           requestNode.addResponse('data', response.data);
         }
