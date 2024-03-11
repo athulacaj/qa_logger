@@ -1,3 +1,8 @@
+## 0.4.1
+- Updated the example file.
+- fixed the issue of clearing the logs.
+- fixed the history of logs not showing in the web interface.
+
 ## 0.4.0
 - Introduced the queue to handle the logs. 
 
