@@ -1,3 +1,7 @@
+## 0.4.2
+- Updated the example file.
+- Upadte the dependencies
+
 ## 0.4.1
 - Updated the example file.
 - fixed the issue of clearing the logs.

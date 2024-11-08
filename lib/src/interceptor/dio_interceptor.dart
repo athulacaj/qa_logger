@@ -87,13 +87,16 @@ class DioInterceptor extends Interceptor {
     options.extra['qa_logs_id'] = requestNode.id;
 
     requestQueue.add(requestNode);
-    handler.next(options);
+    // handler.next(options);
+    super.onRequest(options, handler);
   }
 
   @override
   void onResponse(Response response, ResponseInterceptorHandler handler) async {
     _addResponse(response);
-    handler.next(response);
+    // handler.next(response);
+    super.onResponse(response, handler);
+
   }
 
   @override
@@ -107,7 +110,9 @@ class DioInterceptor extends Interceptor {
       }
     }
 
-    handler.next(err);
+    // handler.next(err);
+    super.onError(err, handler);
+
   }
 
   void _addResponse(Response response) {
