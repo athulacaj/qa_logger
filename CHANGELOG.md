@@ -1,3 +1,6 @@
+## 0.4.3
+- Code formated
+
 ## 0.4.2
 - Updated the example file.
 - Upadte the dependencies

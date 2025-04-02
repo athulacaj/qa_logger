@@ -96,7 +96,6 @@ class DioInterceptor extends Interceptor {
     _addResponse(response);
     // handler.next(response);
     super.onResponse(response, handler);
-
   }
 
   @override
@@ -112,7 +111,6 @@ class DioInterceptor extends Interceptor {
 
     // handler.next(err);
     super.onError(err, handler);
-
   }
 
   void _addResponse(Response response) {
