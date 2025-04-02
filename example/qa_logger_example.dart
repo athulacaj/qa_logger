@@ -22,7 +22,7 @@ Future<void> main() async {
   print(
       "open the browser and go to http://localhost:3000 to see the network calls and logs");
 
-  for (int i = 2; i < 10; i++) {
+  for (int i = 2; i < 20; i++) {
     await Future.delayed(Duration(seconds: 1));
     dio.get('https://jsonplaceholder.typicode.com/todos/$i');
   }

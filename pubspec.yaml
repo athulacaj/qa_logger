@@ -8,7 +8,7 @@ environment:
 
 # Add regular dependencies here.
 dependencies:
-  shelf_web_socket: ^2.0.0
+  shelf_web_socket: ^3.0.0
   shelf: ^1.4.2
   dio: ^5.7.0
   flutter_express: ^0.8.4

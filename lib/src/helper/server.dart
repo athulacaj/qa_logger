@@ -70,12 +70,20 @@ class Server {
   /// Starts the WebSocket server.
   void startWsServer(int wsPort) {
     _wsPort = wsPort;
-    var handler = webSocketHandler((dynamic webSocket) {
-      _webSocketChannel = webSocket;
-      webSocket.stream.listen((message) {
+    // var handler = webSocketHandler((ConnectionCallback webSocket) {
+    //   _webSocketChannel = webSocket;
+    //   webSocket.stream.listen((message) {
+    //     print("message from ws: $message");
+    //   });
+    // });
+
+      var handler = webSocketHandler((webSocket, _) {
+            _webSocketChannel = webSocket;
+    webSocket.stream.listen((message) {
+      // webSocket.sink.add('echo $message');
         print("message from ws: $message");
-      });
     });
+  });
 
     // get a random port from 8002 to 8200
     shelf_io.serve(handler, InternetAddress.anyIPv4, wsPort).then((server) {
