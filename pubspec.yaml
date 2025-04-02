@@ -1,6 +1,6 @@
 name: qa_logger
 description: qa_logger is a Dart package that provides a simple and efficient way to monitor network calls and logs in your application. It's a good tool for QA and backend developers.
-version: 0.4.3
+version: 0.4.5
 repository: https://github.com/athulacaj/qa_logger
 
 environment:
